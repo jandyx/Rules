@@ -1,0 +1,8 @@
+payload:
+  # Xbox
+  - DOMAIN-KEYWORD,xbox
+  - DOMAIN-SUFFIX,xbox.com
+  - DOMAIN-SUFFIX,xbox.co
+  - DOMAIN-SUFFIX,xboxab.com
+  - DOMAIN-SUFFIX,xboxlive.com
+  - DOMAIN-SUFFIX,xboxservices.com
