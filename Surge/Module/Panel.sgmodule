@@ -1,5 +1,5 @@
-#!name=Unlock Detection Panel
-#!desc=流媒体 & AI 解锁检测面板（Netflix/Disney+/YouTube/ChatGPT/Claude/Cursor）
+#!name=Unlock & IP Risk Panel
+#!desc=流媒体 & AI 解锁检测 + IP 风险检测（Netflix/Disney+/YouTube/ChatGPT/Claude/Cursor/IP Risk）
 #!category=Panel
 
 [Script]
@@ -9,6 +9,7 @@ youtube_check = type=generic, script-path=https://cdn.jsdelivr.net/gh/dler-io/Ru
 chatgpt_check = type=generic, script-path=https://cdn.jsdelivr.net/gh/dler-io/Rules@main/Surge/Surge%204/Script/chatgpt_check.js, argument=icon=lasso.and.sparkles&iconerr=xmark.seal.fill&icon-color=#336FA9&iconerr-color=#D65C51
 claude_check = type=generic, script-path=https://cdn.jsdelivr.net/gh/jandyx/Rules@main/Surge/Script/claude_check.js, argument=title=Claude
 cursor_check = type=generic, script-path=https://cdn.jsdelivr.net/gh/jandyx/Rules@main/Surge/Script/cursor_check.js, argument=title=Cursor
+ip_risk_check = type=generic, script-path=https://cdn.jsdelivr.net/gh/jandyx/Rules@main/Surge/Script/ip_risk_check.js, script-update-interval=0
 
 [Panel]
 netflix_check = script-name=netflix_check, update-interval=1800
@@ -17,3 +18,4 @@ youtube_check = script-name=youtube_check, update-interval=1800
 chatgpt_check = script-name=chatgpt_check, update-interval=1800
 claude_check = script-name=claude_check, update-interval=1800
 cursor_check = script-name=cursor_check, update-interval=1800
+ip_risk_check = script-name=ip_risk_check, update-interval=1800
