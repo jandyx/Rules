@@ -1,11 +1,9 @@
 /*
 Claude AI 可用性检测
-通过 Cloudflare trace 获取地区，对比 Claude 支持地区列表
-与 ChatGPT 检测逻辑一致：只看地区，不请求 claude.ai
+通过 claude.ai/cdn-cgi/trace 获取地区，对比支持地区列表
 */
 
-let traceUrl = "http://1.1.1.1/cdn-cgi/trace";
-// Claude 支持的地区列表（来源：Anthropic 官方支持页面）
+let url = "http://claude.ai/cdn-cgi/trace";
 let tf = ["US","GB","CA","AU","NZ","AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","CH","JP","KR","SG","HK","TW","IN","MX","BR","AR","CL","CO","PE","PH","MY","ID","TH","VN","ZA","IL","AE","SA","QA","KW","BH","OM","JO","NG","KE","GH"];
 
 let titlediy, icon, iconerr, iconColor, iconerrColor;
@@ -21,7 +19,7 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-$httpClient.get(traceUrl, function(error, response, data) {
+$httpClient.get(url, function(error, response, data) {
   if (error) {
     $done({
       title: titlediy || 'Claude',

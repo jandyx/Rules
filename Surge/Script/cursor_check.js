@@ -1,11 +1,10 @@
 /*
 Cursor AI 可用性检测
-Cursor 全球基本可用，通过访问 cursor.com API 确认可达性
-使用 Cloudflare trace 通用端点获取地区信息
+通过 cloudflare.com/cdn-cgi/trace 获取地区
+Cursor 全球基本可用，排除制裁地区
 */
 
-let checkUrl = "https://api2.cursor.sh/health";
-let traceUrl = "http://1.1.1.1/cdn-cgi/trace";
+let url = "http://cloudflare.com/cdn-cgi/trace";
 let blocked = ["CN", "RU", "IR", "KP", "SY", "CU", "SD"];
 
 let titlediy, icon, iconerr, iconColor, iconerrColor;
@@ -21,8 +20,7 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-// 先获取地区信息
-$httpClient.get(traceUrl, function(error, response, data) {
+$httpClient.get(url, function(error, response, data) {
   if (error) {
     $done({
       title: titlediy || 'Cursor',
