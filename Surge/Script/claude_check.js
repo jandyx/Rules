@@ -3,7 +3,7 @@ Claude AI 可用性检测
 通过 claude.ai/cdn-cgi/trace 获取地区，对比支持地区列表
 */
 
-let url = "http://claude.ai/cdn-cgi/trace";
+let url = "https://claude.ai/cdn-cgi/trace";
 let tf = ["US","GB","CA","AU","NZ","AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","CH","JP","KR","SG","HK","TW","IN","MX","BR","AR","CL","CO","PE","PH","MY","ID","TH","VN","ZA","IL","AE","SA","QA","KW","BH","OM","JO","NG","KE","GH"];
 
 let titlediy, icon, iconerr, iconColor, iconerrColor;

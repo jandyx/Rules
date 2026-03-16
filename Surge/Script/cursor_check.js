@@ -4,7 +4,7 @@ Cursor AI 可用性检测
 Cursor 全球基本可用，排除制裁地区
 */
 
-let url = "http://cloudflare.com/cdn-cgi/trace";
+let url = "https://cloudflare.com/cdn-cgi/trace";
 let blocked = ["CN", "RU", "IR", "KP", "SY", "CU", "SD"];
 
 let titlediy, icon, iconerr, iconColor, iconerrColor;
