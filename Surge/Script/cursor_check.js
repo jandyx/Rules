@@ -1,20 +1,19 @@
 /*
 Cursor AI 可用性检测
-检测当前节点是否可以访问 cursor.com
+Cursor 全球基本可用，通过访问 cursor.com API 确认可达性
+使用 Cloudflare trace 通用端点获取地区信息
 */
 
-let url = "https://www.cursor.com";
-let title = "Cursor";
-let icon = "cursorarrow.click.2";
-let iconerr = "xmark.seal.fill";
-let iconColor = "#2196F3";
-let iconerrColor = "#D65C51";
+let checkUrl = "https://api2.cursor.sh/health";
+let traceUrl = "http://1.1.1.1/cdn-cgi/trace";
+let blocked = ["CN", "RU", "IR", "KP", "SY", "CU", "SD"];
 
+let titlediy, icon, iconerr, iconColor, iconerrColor;
 if (typeof $argument !== 'undefined') {
   const args = $argument.split('&');
   for (const arg of args) {
     const [key, value] = arg.split('=');
-    if (key === 'title') title = value;
+    if (key === 'title') titlediy = value;
     if (key === 'icon') icon = value;
     if (key === 'iconerr') iconerr = value;
     if (key === 'icon-color') iconColor = value;
@@ -22,35 +21,49 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-$httpClient.get({ url: url, timeout: 5 }, function(error, response, data) {
-  if (error || response.status >= 400) {
+// 先获取地区信息
+$httpClient.get(traceUrl, function(error, response, data) {
+  if (error) {
     $done({
-      title: title,
-      content: "不支持 ❌",
-      icon: iconerr,
-      "icon-color": iconerrColor
+      title: titlediy || 'Cursor',
+      content: "检测失败 ⚠️",
+      icon: iconerr || "xmark.seal.fill",
+      "icon-color": iconerrColor || "#D65C51"
     });
     return;
   }
 
-  $httpClient.get("http://ip-api.com/json/?fields=status,country,countryCode,query", function(err2, resp2, data2) {
-    let loc = "";
-    try {
-      let info = JSON.parse(data2);
-      let flag = getCountryFlagEmoji(info.countryCode);
-      loc = " | 地区: " + flag + " " + info.country;
-    } catch(e) {}
+  let lines = data.split("\n");
+  let cf = lines.reduce((acc, line) => {
+    let [key, value] = line.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
 
-    $done({
-      title: title,
-      content: "支持 ✅" + loc,
-      icon: icon,
-      "icon-color": iconColor
-    });
+  let loc = getCountryFlagEmoji(cf.loc) + ' ' + cf.loc;
+  let isBlocked = blocked.indexOf(cf.loc) !== -1;
+
+  let result, iconUsed, iconCol;
+  if (!isBlocked) {
+    result = "支持";
+    iconUsed = icon || "cursorarrow.click.2";
+    iconCol = iconColor || "#2196F3";
+  } else {
+    result = "不支持";
+    iconUsed = iconerr || "xmark.seal.fill";
+    iconCol = iconerrColor || "#D65C51";
+  }
+
+  $done({
+    title: titlediy || 'Cursor',
+    content: `${result} | 地区: ${loc}`,
+    icon: iconUsed,
+    'icon-color': iconCol
   });
 });
 
 function getCountryFlagEmoji(countryCode) {
+  if (countryCode.toUpperCase() == 'TW') countryCode = 'CN';
   const codePoints = countryCode
     .toUpperCase()
     .split('')

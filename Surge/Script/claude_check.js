@@ -1,20 +1,18 @@
 /*
 Claude AI 可用性检测
-通过访问 claude.ai 首页判断是否可用
+通过 Cloudflare trace 获取地区，对比 Claude 支持地区列表
 */
 
-let url = "https://claude.ai";
-let title = "Claude";
-let icon = "brain.head.profile";
-let iconerr = "xmark.seal.fill";
-let iconColor = "#D97757";
-let iconerrColor = "#D65C51";
+// Claude 支持的地区（Anthropic 官方列表，排除中国大陆、俄罗斯等）
+let url = "http://claude.ai/cdn-cgi/trace";
+let tf = ["US","GB","CA","AU","NZ","AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","CH","JP","KR","SG","HK","TW","IN","MX","BR","AR","CL","CO","PE","PH","MY","ID","TH","VN","ZA","IL","AE","SA","QA","KW","BH","OM","JO","NG","KE","GH","SN","MU","MG","RW","TZ","UG","ET","MA","TN","DZ","EG","PK","BD","LK","NP","MM","KH","LA","MN","GE","AM","AZ","KZ","UZ","KG","TJ","DO","JM","TT","GT","HN","SV","NI","CR","PA","EC","BO","PY","UY","BZ","GY","SR","VE","CU","HT","BS","BB","AG","DM","GD","KN","LC","VC"];
 
+let titlediy, icon, iconerr, iconColor, iconerrColor;
 if (typeof $argument !== 'undefined') {
   const args = $argument.split('&');
   for (const arg of args) {
     const [key, value] = arg.split('=');
-    if (key === 'title') title = value;
+    if (key === 'title') titlediy = value;
     if (key === 'icon') icon = value;
     if (key === 'iconerr') iconerr = value;
     if (key === 'icon-color') iconColor = value;
@@ -22,54 +20,48 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-// Claude 在不支持的地区会返回 403 或重定向
-$httpClient.get({ url: url, timeout: 8, headers: { "User-Agent": "Mozilla/5.0" } }, function(error, response, data) {
+$httpClient.get(url, function(error, response, data) {
   if (error) {
     $done({
-      title: title,
+      title: titlediy || 'Claude',
       content: "检测失败 ⚠️",
-      icon: iconerr,
-      "icon-color": iconerrColor
+      icon: iconerr || "xmark.seal.fill",
+      "icon-color": iconerrColor || "#D65C51"
     });
     return;
   }
 
-  // 获取 IP 地区信息
-  $httpClient.get("http://ip-api.com/json/?fields=status,country,countryCode,query", function(err2, resp2, data2) {
-    let loc = "";
-    let countryCode = "";
-    try {
-      let info = JSON.parse(data2);
-      countryCode = info.countryCode;
-      let flag = getCountryFlagEmoji(countryCode);
-      loc = " | 地区: " + flag + " " + info.country;
-    } catch(e) {}
+  let lines = data.split("\n");
+  let cf = lines.reduce((acc, line) => {
+    let [key, value] = line.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
 
-    // Claude 不支持的地区：中国大陆、俄罗斯、伊朗、朝鲜、叙利亚、古巴等
-    let blocked = ["CN", "RU", "IR", "KP", "SY", "CU", "SD", "BY"];
-    let isBlocked = blocked.indexOf(countryCode) !== -1;
+  let loc = getCountryFlagEmoji(cf.loc) + ' ' + cf.loc;
+  let l = tf.indexOf(cf.loc);
 
-    // 如果响应包含 "unavailable" 或状态码 403，也判定为不支持
-    let status = response.status;
-    if (isBlocked || status === 403 || (data && data.includes("unavailable in your country"))) {
-      $done({
-        title: title,
-        content: "不支持 ❌" + loc,
-        icon: iconerr,
-        "icon-color": iconerrColor
-      });
-    } else {
-      $done({
-        title: title,
-        content: "支持 ✅" + loc,
-        icon: icon,
-        "icon-color": iconColor
-      });
-    }
+  let result, iconUsed, iconCol;
+  if (l !== -1) {
+    result = "支持";
+    iconUsed = icon || "brain.head.profile";
+    iconCol = iconColor || "#D97757";
+  } else {
+    result = "不支持";
+    iconUsed = iconerr || "xmark.seal.fill";
+    iconCol = iconerrColor || "#D65C51";
+  }
+
+  $done({
+    title: titlediy || 'Claude',
+    content: `${result} | 地区: ${loc}`,
+    icon: iconUsed,
+    'icon-color': iconCol
   });
 });
 
 function getCountryFlagEmoji(countryCode) {
+  if (countryCode.toUpperCase() == 'TW') countryCode = 'CN';
   const codePoints = countryCode
     .toUpperCase()
     .split('')
