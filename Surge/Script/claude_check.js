@@ -19,11 +19,9 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-console.log("[Claude Check] Starting, URL: " + url);
 
 $httpClient.get(url, function(error, response, data) {
   if (error) {
-    console.log("[Claude Check] Error: " + JSON.stringify(error));
     $done({
       title: titlediy || 'Claude',
       content: "检测失败 ⚠️",
@@ -33,8 +31,6 @@ $httpClient.get(url, function(error, response, data) {
     return;
   }
 
-  console.log("[Claude Check] Status: " + response.status);
-  console.log("[Claude Check] Data: " + data.substring(0, 200));
 
   let lines = data.split("\n");
   let cf = lines.reduce((acc, line) => {
@@ -43,12 +39,10 @@ $httpClient.get(url, function(error, response, data) {
     return acc;
   }, {});
 
-  console.log("[Claude Check] loc=" + cf.loc);
 
   let loc = getCountryFlagEmoji(cf.loc) + ' ' + cf.loc;
   let l = tf.indexOf(cf.loc);
 
-  console.log("[Claude Check] In support list: " + (l !== -1));
 
   let result, iconUsed, iconCol;
   if (l !== -1) {
