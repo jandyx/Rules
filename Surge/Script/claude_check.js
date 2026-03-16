@@ -19,7 +19,6 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-
 $httpClient.get(url, function(error, response, data) {
   if (error) {
     $done({
@@ -31,7 +30,6 @@ $httpClient.get(url, function(error, response, data) {
     return;
   }
 
-
   let lines = data.split("\n");
   let cf = lines.reduce((acc, line) => {
     let [key, value] = line.split("=");
@@ -39,10 +37,8 @@ $httpClient.get(url, function(error, response, data) {
     return acc;
   }, {});
 
-
   let loc = getCountryFlagEmoji(cf.loc) + ' ' + cf.loc;
   let l = tf.indexOf(cf.loc);
-
 
   let result, iconUsed, iconCol;
   if (l !== -1) {
