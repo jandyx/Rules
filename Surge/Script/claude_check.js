@@ -1,11 +1,12 @@
 /*
 Claude AI 可用性检测
-通过 Cloudflare trace 获取地区，对比 Claude 支持地区列表
+1. 通过 1.1.1.1/cdn-cgi/trace 获取地区
+2. 请求 claude.ai 验证可达性
 */
 
-// Claude 支持的地区（Anthropic 官方列表，排除中国大陆、俄罗斯等）
-let url = "http://claude.ai/cdn-cgi/trace";
-let tf = ["US","GB","CA","AU","NZ","AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","CH","JP","KR","SG","HK","TW","IN","MX","BR","AR","CL","CO","PE","PH","MY","ID","TH","VN","ZA","IL","AE","SA","QA","KW","BH","OM","JO","NG","KE","GH","SN","MU","MG","RW","TZ","UG","ET","MA","TN","DZ","EG","PK","BD","LK","NP","MM","KH","LA","MN","GE","AM","AZ","KZ","UZ","KG","TJ","DO","JM","TT","GT","HN","SV","NI","CR","PA","EC","BO","PY","UY","BZ","GY","SR","VE","CU","HT","BS","BB","AG","DM","GD","KN","LC","VC"];
+let traceUrl = "http://1.1.1.1/cdn-cgi/trace";
+let checkUrl = "https://claude.ai";
+let blocked = ["CN", "RU", "IR", "KP", "SY", "CU", "SD", "BY"];
 
 let titlediy, icon, iconerr, iconColor, iconerrColor;
 if (typeof $argument !== 'undefined') {
@@ -20,7 +21,8 @@ if (typeof $argument !== 'undefined') {
   }
 }
 
-$httpClient.get(url, function(error, response, data) {
+// 获取地区
+$httpClient.get(traceUrl, function(error, response, data) {
   if (error) {
     $done({
       title: titlediy || 'Claude',
@@ -39,24 +41,35 @@ $httpClient.get(url, function(error, response, data) {
   }, {});
 
   let loc = getCountryFlagEmoji(cf.loc) + ' ' + cf.loc;
-  let l = tf.indexOf(cf.loc);
+  let isBlocked = blocked.indexOf(cf.loc) !== -1;
 
-  let result, iconUsed, iconCol;
-  if (l !== -1) {
-    result = "支持";
-    iconUsed = icon || "brain.head.profile";
-    iconCol = iconColor || "#D97757";
-  } else {
-    result = "不支持";
-    iconUsed = iconerr || "xmark.seal.fill";
-    iconCol = iconerrColor || "#D65C51";
+  if (isBlocked) {
+    $done({
+      title: titlediy || 'Claude',
+      content: "不支持 | 地区: " + loc,
+      icon: iconerr || "xmark.seal.fill",
+      "icon-color": iconerrColor || "#D65C51"
+    });
+    return;
   }
 
-  $done({
-    title: titlediy || 'Claude',
-    content: `${result} | 地区: ${loc}`,
-    icon: iconUsed,
-    'icon-color': iconCol
+  // 验证 claude.ai 可达性
+  $httpClient.get({ url: checkUrl, timeout: 8, headers: { "User-Agent": "Mozilla/5.0" } }, function(err2, resp2, data2) {
+    if (err2 || (resp2 && resp2.status === 403)) {
+      $done({
+        title: titlediy || 'Claude',
+        content: "不支持 | 地区: " + loc,
+        icon: iconerr || "xmark.seal.fill",
+        "icon-color": iconerrColor || "#D65C51"
+      });
+    } else {
+      $done({
+        title: titlediy || 'Claude',
+        content: "支持 | 地区: " + loc,
+        icon: icon || "brain.head.profile",
+        "icon-color": iconColor || "#D97757"
+      });
+    }
   });
 });
 
