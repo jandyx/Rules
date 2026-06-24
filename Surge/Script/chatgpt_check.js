@@ -36,8 +36,10 @@ if (typeof $argument !== 'undefined') {
 
 const TITLE = titlediy ? titlediy : 'ChatGPT';
 
-// 发送 HTTP 请求获取所在地信息
-$httpClient.get(url,function(error,response,data){
+// 发送 HTTP 请求获取所在地信息。
+// 用对象形式带 timeout,确保慢/重启中的代理不会让脚本卡死到 "evaluating
+// timeout"(那样面板会退回 Untitled);超时则走 error 分支显示「检测失败」。
+$httpClient.get({ url: url, timeout: 10 },function(error,response,data){
   if (error || !data) {
   console.error(error || 'empty response');
   $done({
