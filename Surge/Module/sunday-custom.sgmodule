@@ -1,0 +1,6 @@
+#!name=sunday-custom
+#!desc=Shared Sunday company rules, independent of subscription updates.
+#!system=mac
+
+[Rule]
+DOMAIN,files.sundayonline.top,DIRECT
