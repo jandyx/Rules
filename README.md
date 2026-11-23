@@ -53,4 +53,4 @@ A successful result is intentionally compact, for example:
 
 The country, type, and risk are third-party metadata from IPPure. Missing or malformed classification is shown as unknown rather than guessed, and this is not proof of a residential line, Claude account unlock, or successful real conversation. The Anthropic request is only a hidden HTTP reachability check; unauthenticated 401 is accepted.
 
-Scripts are served through jsDelivr `@main`; after a push, purge with `https://purge.jsdelivr.net/gh/jandyx/Rules@main/<path>` and bump the `?v=` query on the script-path if Surge keeps the old body.
+The subscription URL stays on `@main`. Its Claude, IP Risk and ISP scripts are pinned to a verified commit. Publish the scripts first, then update the module pins and purge the subscription URL from jsDelivr.
