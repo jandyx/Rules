@@ -40,7 +40,7 @@ function fail(content, iconOverride, colorOverride) {
 function normalizeIppure(info) {
   return {
     cc: info.countryCode || "",
-    score: typeof info.fraudScore === "number" ? Math.round(info.fraudScore) : 0,
+    score: info.fraudScore,
     residential: info.isResidential !== false,
     tor: !!info.isTor,
     proxy: !!(info.isProxy || info.isVpn),
@@ -50,7 +50,8 @@ function normalizeIppure(info) {
 
 function normalizeProxycheck(entry) {
   let type = entry.type || "";
-  let score = typeof entry.risk === "number" ? entry.risk : (parseInt(entry.risk, 10) || 0);
+  const raw = entry.risk;
+  const score = typeof raw === "string" && /^\d+(?:\.\d+)?$/.test(raw) ? Number(raw) : raw;
   return {
     cc: entry.isocode || "",
     score: score,
@@ -61,39 +62,35 @@ function normalizeProxycheck(entry) {
   };
 }
 
-function riskByScore(score) {
-  return score > 70 ? "极高(" + score + "%)" :
-    score > 40 ? "高(" + score + "%)" :
-    score > 15 ? "中(" + score + "%)" : "低(" + score + "%)";
+function riskRating(score) {
+  if (!Number.isFinite(score) || score < 0 || score > 100) return { label: "未知", color: "#8E8E93" };
+  if (score > 70) return { label: "极高", color: "#F44336" };
+  if (score > 40) return { label: "高", color: "#F44336" };
+  if (score > 15) return { label: "中", color: "#FF9800" };
+  return { label: "低", color: "#4CAF50" };
 }
 
 function finish(norm, source) {
   let flag = norm.cc ? getCountryFlagEmoji(norm.cc) + " " + norm.cc : "";
   let company = norm.company || "";
   if (company.length > 18) company = company.substring(0, 18) + "..";
-  let score = norm.score || 0;
+  const rating = norm.tor ? { label: "极高", color: "#F44336" } : riskRating(norm.score);
+  let risk = rating.label;
+  if (!norm.tor && risk !== "未知") risk += "(" + Math.round(norm.score) + "%)";
 
-  let type, risk, iconUsed, iconCol;
+  let type, iconUsed;
   if (norm.tor) {
     type = "Tor";
-    risk = "极高";
     iconUsed = "shield.lefthalf.filled.slash";
-    iconCol = "#F44336";
   } else if (norm.proxy) {
     type = "代理IP";
-    risk = riskByScore(score);
     iconUsed = "shield.lefthalf.filled.slash";
-    iconCol = score > 70 ? "#F44336" : "#FF9800";
   } else if (!norm.residential) {
     type = "机房IP";
-    risk = riskByScore(score);
     iconUsed = "shield.lefthalf.filled.trianglebadge.exclamationmark";
-    iconCol = score > 70 ? "#F44336" : "#FF9800";
   } else {
     type = "住宅IP";
-    risk = riskByScore(score);
     iconUsed = "shield.lefthalf.filled.badge.checkmark";
-    iconCol = score > 40 ? "#FF9800" : "#4CAF50";
   }
 
   let segments = [];
@@ -108,7 +105,7 @@ function finish(norm, source) {
     title: titlediy || "IP Risk",
     content: content,
     icon: iconUsed,
-    "icon-color": iconCol
+    "icon-color": rating.color
   });
 }
 

@@ -36,6 +36,10 @@ https://raw.githubusercontent.com/jandyx/Rules/main/Surge/Module/Panel.sgmodule
 
 Netflix / Disney+ / YouTube checks are loaded from dler-io/Rules.
 
+### Claude row
+
+Each refresh combines [per-signal API contributions](https://github.com/LinXiaoTao/FuckClaude/blob/5c0c30f57595ae783856912a9cd21b0dc6b1e2d7/src/pages/api/check.ts#L213-L249) from the Claude exit with measurements in Surge's WebView. The API supplies the exit timezone and request-header signals; local UTC offset replaces the inferred offset. Local Intl locale and measurable font signals fill remaining fields. Each refresh also allows up to 3 s for a WebView ICE probe using Cloudflare STUN (the STUN service sees its network source IP). Only comparable public IPv4 server-reflexive candidates enter the existing WebRTC weight: a different IP from the same-run Claude trace is a path mismatch, not proof of an ISP leak. Host-only, no comparable IPv4, and inconclusive timeouts are unmeasured, never a zero-risk pass. No candidate address is displayed or submitted to the scoring API. The panel shows only the region and overall risk; it does not read the DNS cache. The score is the sum of rounded contributions divided by the weight actually covered, scaled to 100. The Chinese profile is selected explicitly. Both sources are required; otherwise the row shows `未检测`. No local font list or settings are uploaded. This is a third-party environment heuristic, not a Chrome scan or an account restriction probability. No Chrome session, manual import, or stored score is used.
+
 ### ISP row
 
 `isp_check.js` defaults to `argument=title=ISP&policy=Custom-ISP`. Add `expected-ip=<IPv4>` only when you want the panel to warn on an exit-IP mismatch. Every request uses Surge `$httpClient` with the configured policy; if the policy is missing the script stops without falling back to DIRECT.
