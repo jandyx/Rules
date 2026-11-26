@@ -4,3 +4,4 @@
 
 [Rule]
 DOMAIN,files.sundayonline.top,DIRECT
+DOMAIN-SUFFIX,xclient.info,DIRECT,extended-matching
