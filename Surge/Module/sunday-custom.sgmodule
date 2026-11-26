@@ -5,5 +5,7 @@
 [Rule]
 # NTP: airport nodes drop UDP 123, so time sync must bypass proxies.
 DEST-PORT,123,DIRECT
+# codesign timestamps: a dropped proxy node fails signing ("timestamp service is not available").
+DOMAIN,timestamp.apple.com,DIRECT
 DOMAIN,files.sundayonline.top,DIRECT
 DOMAIN-SUFFIX,xclient.info,DIRECT,extended-matching
