@@ -3,5 +3,7 @@
 #!system=mac
 
 [Rule]
+# NTP: airport nodes drop UDP 123, so time sync must bypass proxies.
+DEST-PORT,123,DIRECT
 DOMAIN,files.sundayonline.top,DIRECT
 DOMAIN-SUFFIX,xclient.info,DIRECT,extended-matching
